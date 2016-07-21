@@ -90,6 +90,10 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_RA_MAG_ST2				0x09
 #define MPU9250_RA_MAG_CONT1			0x0A
 #define MPU9250_RA_MAG_CONT2			0x0B
+#define MPU9250_RA_MAG_ASTC				0x0C
+#define MPU9250_RA_MAG_ASAX				0x10
+#define MPU9250_RA_MAG_ASAY				0x11
+#define MPU9250_RA_MAG_ASAZ				0x12
 
 #define MPU9250_MAG_MODE_OFF			0b0000
 #define MPU9250_MAG_MODE_SINGLE			0b0001
@@ -101,6 +105,8 @@ typedef uint32_t prog_uint32_t;
 
 #define MPU9250_MAG_SENS_14BIT			0	// 0.6  microT/LSB
 #define MPU9250_MAG_SENS_16BIT			1	// 0.16 microT/LSB
+
+#define MPU9250_MAG_SENS_MAP(asa)	    ((((asa - 128) * 0.5f) / 128.0f) + 1)
 
 #define MPU9250_ADDRESS_AD0_LOW			0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU9250_ADDRESS_AD0_HIGH		0x69 // address pin high (VCC)
@@ -1045,6 +1051,10 @@ public:
 
 	uint8_t magGetSensitivity();
 	void magSetSensitivity(uint8_t sensititiy);
+
+	bool magSelfTest(uint64_t timeoutMillis);
+
+	void magGetAxisSensitivity(float* sx, float *sy, float *sz);
 
 private:
 	uint8_t devAddr;

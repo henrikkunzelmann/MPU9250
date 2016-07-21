@@ -3147,3 +3147,60 @@ bool MPU9250::magIsDataOverrun() {
 	I2Cdev::readByte(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ST1, buffer);
 	return buffer[0] & 0b10;
 }
+
+bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
+	uint8_t mode = magGetOperationMode();
+	uint8_t sensitivity = magGetSensitivity();
+	float sx, sy, sz;
+	magGetAxisSensitivity(&sx, &sy, &sz);
+
+	magSetOperationMode(MPU9250_MAG_MODE_OFF);
+	delay(10);
+
+	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 1);
+	delay(10);
+	
+	magSetOperationMode(MPU9250_MAG_MODE_SELFTEST);
+	delay(10);
+
+	uint64_t start = millis();
+	while (true) {
+		if (millis() - start > timeoutMillis) {
+			magSetOperationMode(mode);
+			return false;
+		}
+
+		if (magIsDataReady())
+			break;
+	}
+
+	int16_t mx, my, mz;
+	getMag(&mx, &my, &mz);
+
+	mx *= sx;
+	my *= sy;
+	mz *= sz;
+
+	magSetOperationMode(mode);
+
+	if (mode == 0)
+		return abs(mx) <= 50 && abs(my) <= 50 && mz >= -800 && mz <= -200;
+
+	return abs(mx) <= 200 && abs(my) <= 200 && mz >= -3200 && mz <= -800;
+}
+
+void MPU9250::magGetAxisSensitivity(float* sx, float* sy, float* sz) {
+	uint8_t mode = magGetOperationMode();
+	magSetOperationMode(MPU9250_MAG_MODE_FUSE);
+	delay(10);
+
+	I2Cdev::readBytes(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASAX, 3, buffer);
+	*sx = MPU9250_MAG_SENS_MAP(buffer[0]);
+	*sy = MPU9250_MAG_SENS_MAP(buffer[1]);
+	*sz = MPU9250_MAG_SENS_MAP(buffer[2]);
+
+	magSetOperationMode(MPU9250_MAG_MODE_OFF);
+	delay(10);
+
+	magSetOperationMode(mode);
+}
