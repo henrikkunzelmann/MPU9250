@@ -3180,6 +3180,9 @@ bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
 	mx *= sx;
 	my *= sy;
 	mz *= sz;
+	
+	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 0);
+	delay(10);
 
 	magSetOperationMode(mode);
 
