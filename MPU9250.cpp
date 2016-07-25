@@ -3120,6 +3120,10 @@ bool MPU9250::magInit() {
 	return true;
 }
 
+void MPU9250::magSoftReset() {
+	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT2, 0, 1);
+}
+
 uint8_t MPU9250::magGetOperationMode() {
 	I2Cdev::readBits(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT1, 3, 4, buffer);
 	return buffer[0];

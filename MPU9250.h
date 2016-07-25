@@ -1042,6 +1042,8 @@ public:
 	bool magCheckConnection();
 
 	bool magInit();
+	
+	void magSoftReset();
 
 	bool magIsDataReady();
 	bool magIsDataOverrun();
