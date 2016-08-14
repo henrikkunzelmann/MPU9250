@@ -52,13 +52,13 @@ MPU9250::MPU9250(uint8_t address) {
 * the clock source to use the X Gyro for reference, which is slightly better than
 * the default internal clock source.
 */
-void MPU9250::initialize() {
+bool MPU9250::initialize() {
 	setClockSource(MPU9250_CLOCK_PLL_XGYRO);
 	setFullScaleGyroRange(MPU9250_GYRO_FS_250);
 	setFullScaleAccelRange(MPU9250_ACCEL_FS_2);
 	setSleepEnabled(false); // thanks to Jack Elston for pointing this one out!
 	
-	magInit();
+	return magInit();
 }
 
 /** Verify the I2C connection.
@@ -1708,20 +1708,22 @@ bool MPU9250::getIntDataReadyStatus() {
 * @see getRotation()
 * @see MPU9250_RA_ACCEL_XOUT_H
 */
-void MPU9250::getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz) {
-
-	getMotion6(ax, ay, az, gx, gy, gz);
-	getMag(mx, my, mz);
+bool MPU9250::getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz) {
+	if (!getMotion6(ax, ay, az, gx, gy, gz))
+		return false;
+	return getMag(mx, my, mz);
 }
 
-void MPU9250::getMag(int16_t* mx, int16_t* my, int16_t* mz) {
-	I2Cdev::readBytes(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_XOUT_L, 7, buffer);
+bool MPU9250::getMag(int16_t* mx, int16_t* my, int16_t* mz) {
+	if (!I2Cdev::readBytes(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_XOUT_L, 7, buffer))
+		return false;
 	if (buffer[6] & 0b10) // HOFL: Magnetic sensor overflow
-		return;
+		return false;
 
 	*mx = (((int16_t)buffer[1]) << 8) | buffer[0];
 	*my = (((int16_t)buffer[3]) << 8) | buffer[2];
 	*mz = (((int16_t)buffer[5]) << 8) | buffer[4];
+	return true;
 }
 
 /** Get raw 6-axis motion sensor readings (accel/gyro).
@@ -1736,14 +1738,16 @@ void MPU9250::getMag(int16_t* mx, int16_t* my, int16_t* mz) {
 * @see getRotation()
 * @see MPU9250_RA_ACCEL_XOUT_H
 */
-void MPU9250::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz) {
-	I2Cdev::readBytes(devAddr, MPU9250_RA_ACCEL_XOUT_H, 14, buffer);
+bool MPU9250::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz) {
+	if (!I2Cdev::readBytes(devAddr, MPU9250_RA_ACCEL_XOUT_H, 14, buffer))
+		return false;
 	*ax = (((int16_t)buffer[0]) << 8) | buffer[1];
 	*ay = (((int16_t)buffer[2]) << 8) | buffer[3];
 	*az = (((int16_t)buffer[4]) << 8) | buffer[5];
 	*gx = (((int16_t)buffer[8]) << 8) | buffer[9];
 	*gy = (((int16_t)buffer[10]) << 8) | buffer[11];
 	*gz = (((int16_t)buffer[12]) << 8) | buffer[13];
+	return true;
 }
 /** Get 3-axis accelerometer readings.
 * These registers store the most recent accelerometer measurements.
@@ -1781,11 +1785,13 @@ void MPU9250::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int
 * @param z 16-bit signed integer container for Z-axis acceleration
 * @see MPU9250_RA_GYRO_XOUT_H
 */
-void MPU9250::getAcceleration(int16_t* x, int16_t* y, int16_t* z) {
-	I2Cdev::readBytes(devAddr, MPU9250_RA_ACCEL_XOUT_H, 6, buffer);
+bool MPU9250::getAcceleration(int16_t* x, int16_t* y, int16_t* z) {
+	if (!I2Cdev::readBytes(devAddr, MPU9250_RA_ACCEL_XOUT_H, 6, buffer))
+		return false;
 	*x = (((int16_t)buffer[0]) << 8) | buffer[1];
 	*y = (((int16_t)buffer[2]) << 8) | buffer[3];
 	*z = (((int16_t)buffer[4]) << 8) | buffer[5];
+	return true;
 }
 /** Get X-axis accelerometer reading.
 * @return X-axis acceleration measurement in 16-bit 2's complement format
@@ -1821,9 +1827,11 @@ int16_t MPU9250::getAccelerationZ() {
 * @return Temperature reading in 16-bit 2's complement format
 * @see MPU9250_RA_TEMP_OUT_H
 */
-int16_t MPU9250::getTemperature() {
-	I2Cdev::readBytes(devAddr, MPU9250_RA_TEMP_OUT_H, 2, buffer);
-	return (((int16_t)buffer[0]) << 8) | buffer[1];
+bool MPU9250::getTemperature(int16_t* temp) {
+	if (!I2Cdev::readBytes(devAddr, MPU9250_RA_TEMP_OUT_H, 2, buffer))
+		return false;
+	*temp = (((int16_t)buffer[0]) << 8) | buffer[1];
+	return true;
 }
 
 // GYRO_*OUT_* registers
@@ -1860,11 +1868,13 @@ int16_t MPU9250::getTemperature() {
 * @see getMotion6()
 * @see MPU9250_RA_GYRO_XOUT_H
 */
-void MPU9250::getRotation(int16_t* x, int16_t* y, int16_t* z) {
-	I2Cdev::readBytes(devAddr, MPU9250_RA_GYRO_XOUT_H, 6, buffer);
+bool MPU9250::getRotation(int16_t* x, int16_t* y, int16_t* z) {
+	if (!I2Cdev::readBytes(devAddr, MPU9250_RA_GYRO_XOUT_H, 6, buffer))
+		return false;
 	*x = (((int16_t)buffer[0]) << 8) | buffer[1];
 	*y = (((int16_t)buffer[2]) << 8) | buffer[3];
 	*z = (((int16_t)buffer[4]) << 8) | buffer[5];
+	return true;
 }
 /** Get X-axis gyroscope reading.
 * @return X-axis rotation measurement in 16-bit 2's complement format
@@ -3110,18 +3120,21 @@ bool MPU9250::magCheckConnection() {
 }
 
 bool MPU9250::magInit() {
-	I2Cdev::writeByte(devAddr, MPU9250_RA_INT_PIN_CFG, 0x02); // set i2c bypass enable pin to true to access magnetometer
+	if (!I2Cdev::writeByte(devAddr, MPU9250_RA_INT_PIN_CFG, 0x02)) // set i2c bypass enable pin to true to access magnetometer
+		return false; 
 
 	if (!magCheckConnection())
 		return false;
 
-	magSetOperationMode(MPU9250_MAG_MODE_CONT2);
-	magSetSensitivity(MPU9250_MAG_SENS_16BIT);
+	if (!magSetOperationMode(MPU9250_MAG_MODE_CONT2))
+		return false;
+	if (!magSetSensitivity(MPU9250_MAG_SENS_16BIT))
+		return false;
 	return true;
 }
 
-void MPU9250::magSoftReset() {
-	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT2, 0, 1);
+bool MPU9250::magSoftReset() {
+	return I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT2, 0, 1);
 }
 
 uint8_t MPU9250::magGetOperationMode() {
@@ -3129,8 +3142,8 @@ uint8_t MPU9250::magGetOperationMode() {
 	return buffer[0];
 }
 
-void MPU9250::magSetOperationMode(uint8_t mode) {
-	I2Cdev::writeBits(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT1, 3, 4, mode);
+bool MPU9250::magSetOperationMode(uint8_t mode) {
+	return I2Cdev::writeBits(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT1, 3, 4, mode);
 }
 
 uint8_t MPU9250::magGetSensitivity() {
@@ -3138,8 +3151,8 @@ uint8_t MPU9250::magGetSensitivity() {
 	return (bool)buffer[0];
 }
 
-void MPU9250::magSetSensitivity(uint8_t sensitivity) {
-	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT1, 4, sensitivity);
+bool MPU9250::magSetSensitivity(uint8_t sensitivity) {
+	return I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_CONT1, 4, sensitivity);
 }
 
 bool MPU9250::magIsDataReady() {
@@ -3156,15 +3169,19 @@ bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
 	uint8_t mode = magGetOperationMode();
 	uint8_t sensitivity = magGetSensitivity();
 	float sx, sy, sz;
-	magGetAxisSensitivity(&sx, &sy, &sz);
+	if (!magGetAxisSensitivity(&sx, &sy, &sz))
+		return false;
 
-	magSetOperationMode(MPU9250_MAG_MODE_OFF);
+	if (!magSetOperationMode(MPU9250_MAG_MODE_OFF))
+		return false;
 	delay(10);
 
-	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 1);
+	if (!I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 1))
+		return false;
 	delay(10);
 	
-	magSetOperationMode(MPU9250_MAG_MODE_SELFTEST);
+	if (!magSetOperationMode(MPU9250_MAG_MODE_SELFTEST))
+		return false;
 	delay(10);
 
 	uint64_t start = millis();
@@ -3185,10 +3202,12 @@ bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
 	my *= sy;
 	mz *= sz;
 	
-	I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 0);
+	if (!I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 0))
+		return false;
 	delay(10);
 
-	magSetOperationMode(mode);
+	if (!magSetOperationMode(mode))
+		return false;
 
 	if (mode == 0)
 		return abs(mx) <= 50 && abs(my) <= 50 && mz >= -800 && mz <= -200;
@@ -3196,18 +3215,21 @@ bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
 	return abs(mx) <= 200 && abs(my) <= 200 && mz >= -3200 && mz <= -800;
 }
 
-void MPU9250::magGetAxisSensitivity(float* sx, float* sy, float* sz) {
+bool MPU9250::magGetAxisSensitivity(float* sx, float* sy, float* sz) {
 	uint8_t mode = magGetOperationMode();
-	magSetOperationMode(MPU9250_MAG_MODE_FUSE);
+	if (!magSetOperationMode(MPU9250_MAG_MODE_FUSE))
+		return false;
 	delay(10);
 
-	I2Cdev::readBytes(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASAX, 3, buffer);
+	if (!I2Cdev::readBytes(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASAX, 3, buffer))
+		return false;
 	*sx = MPU9250_MAG_SENS_MAP(buffer[0]);
 	*sy = MPU9250_MAG_SENS_MAP(buffer[1]);
 	*sz = MPU9250_MAG_SENS_MAP(buffer[2]);
 
-	magSetOperationMode(MPU9250_MAG_MODE_OFF);
+	if (!magSetOperationMode(MPU9250_MAG_MODE_OFF))
+		return false;
 	delay(10);
 
-	magSetOperationMode(mode);
+	return magSetOperationMode(mode);
 }

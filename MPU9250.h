@@ -459,7 +459,7 @@ public:
 	MPU9250();
 	MPU9250(uint8_t address);
 
-	void initialize();
+	bool initialize();
 	bool testConnection();
 
 	// AUX_VDDIO register
@@ -632,20 +632,20 @@ public:
 	bool getIntDataReadyStatus();
 
 	// ACCEL_*OUT_* registers
-	void getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz);
-	void getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
-	void getAcceleration(int16_t* x, int16_t* y, int16_t* z);
+	bool getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz);
+	bool getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
+	bool getAcceleration(int16_t* x, int16_t* y, int16_t* z);
 	int16_t getAccelerationX();
 	int16_t getAccelerationY();
 	int16_t getAccelerationZ();
 
-	void getMag(int16_t* mx, int16_t* my, int16_t* mz);
+	bool getMag(int16_t* mx, int16_t* my, int16_t* mz);
 
 	// TEMP_OUT_* registers
-	int16_t getTemperature();
+	bool getTemperature(int16_t* temperature);
 
 	// GYRO_*OUT_* registers
-	void getRotation(int16_t* x, int16_t* y, int16_t* z);
+	bool getRotation(int16_t* x, int16_t* y, int16_t* z);
 	int16_t getRotationX();
 	int16_t getRotationY();
 	int16_t getRotationZ();
@@ -1043,20 +1043,20 @@ public:
 
 	bool magInit();
 	
-	void magSoftReset();
+	bool magSoftReset();
 
 	bool magIsDataReady();
 	bool magIsDataOverrun();
 
 	uint8_t magGetOperationMode();
-	void magSetOperationMode(uint8_t mode);
+	bool magSetOperationMode(uint8_t mode);
 
 	uint8_t magGetSensitivity();
-	void magSetSensitivity(uint8_t sensititiy);
+	bool magSetSensitivity(uint8_t sensititiy);
 
 	bool magSelfTest(uint64_t timeoutMillis);
 
-	void magGetAxisSensitivity(float* sx, float *sy, float *sz);
+	bool magGetAxisSensitivity(float* sx, float *sy, float *sz);
 
 private:
 	uint8_t devAddr;
