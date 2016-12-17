@@ -2397,26 +2397,36 @@ bool MPU9250::magIsDataOverrun() {
 bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
 	uint8_t mode = magGetOperationMode();
 	uint8_t sensitivity = magGetSensitivity();
+
+	// save axis sensitivity
 	float sx, sy, sz;
 	if (!magGetAxisSensitivity(&sx, &sy, &sz))
 		return false;
 
+	// (1) Set Power - down mode. (MODE[3:0] = “0000”)
 	if (!magSetOperationMode(MPU9250_MAG_MODE_OFF))
 		return false;
 	delay(10);
 
+	// (2) Write “1” to SELF bit of ASTC register (other bits in this register should be kept “0”)
 	if (!I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 1))
 		return false;
 	delay(10);
 	
+	// (3) Set Self - test Mode. (MODE[3:0] = “1000”)
 	if (!magSetOperationMode(MPU9250_MAG_MODE_SELFTEST))
 		return false;
 	delay(10);
 
+	// (4) Check Data Ready or not by any of the following method.
+	//	- Polling DRDY bit of ST1 register
+	//	- Monitor DRDY pin
 	uint64_t start = millis();
 	while (true) {
 		if (millis() - start > timeoutMillis) {
+			I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 0);
 			magSetOperationMode(mode);
+
 			return false;
 		}
 
@@ -2424,21 +2434,31 @@ bool MPU9250::magSelfTest(uint64_t timeoutMillis) {
 			break;
 	}
 
+	// (5) Read measurement data(HXL to HZH)
 	int16_t mx, my, mz;
 	getMag(&mx, &my, &mz);
 
+	// When measurement data read by the above sequence is in the range of following table after sensitivity
+	// adjustment(refer to 8.3.11), AK8963 is working normally.
 	mx *= sx;
 	my *= sy;
 	mz *= sz;
 	
+	//(6) Write “0” to SELF bit of ASTC register
 	if (!I2Cdev::writeBit(MPU9250_RA_MAG_ADDRESS, MPU9250_RA_MAG_ASTC, 6, 0))
 		return false;
 	delay(10);
 
+	//(7) Set Power - down mode. (MODE[3:0] = “0000”)
+	if (!magSetOperationMode(MPU9250_MAG_MODE_OFF))
+		return false;
+	delay(10);
+
+	// restore operation mode
 	if (!magSetOperationMode(mode))
 		return false;
 
-	if (mode == 0)
+	if (sensitivity == MPU9250_MAG_SENS_14BIT)
 		return abs(mx) <= 50 && abs(my) <= 50 && mz >= -800 && mz <= -200;
 
 	return abs(mx) <= 200 && abs(my) <= 200 && mz >= -3200 && mz <= -800;
