@@ -31,51 +31,6 @@ THE SOFTWARE.
 
 #include "I2Cdev.h"
 
-// Tom Carpenter's conditional PROGMEM code
-// http://forum.arduino.cc/index.php?topic=129407.0
-#ifdef __AVR__
-#include <avr/pgmspace.h>
-#else
-// Teensy 3.0 library conditional PROGMEM code from Paul Stoffregen
-#ifndef __PGMSPACE_H_
-#define __PGMSPACE_H_ 1
-#include <inttypes.h>
-
-#define PROGMEM
-#define PGM_P  const char *
-#define PSTR(str) (str)
-#define F(x) x
-
-typedef void prog_void;
-typedef char prog_char;
-typedef unsigned char prog_uchar;
-typedef int8_t prog_int8_t;
-typedef uint8_t prog_uint8_t;
-typedef int16_t prog_int16_t;
-typedef uint16_t prog_uint16_t;
-typedef int32_t prog_int32_t;
-typedef uint32_t prog_uint32_t;
-
-#define strcpy_P(dest, src) strcpy((dest), (src))
-#define strcat_P(dest, src) strcat((dest), (src))
-#define strcmp_P(a, b) strcmp((a), (b))
-
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#define pgm_read_word(addr) (*(const unsigned short *)(addr))
-#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
-#define pgm_read_float(addr) (*(const float *)(addr))
-
-#define pgm_read_byte_near(addr) pgm_read_byte(addr)
-#define pgm_read_word_near(addr) pgm_read_word(addr)
-#define pgm_read_dword_near(addr) pgm_read_dword(addr)
-#define pgm_read_float_near(addr) pgm_read_float(addr)
-#define pgm_read_byte_far(addr) pgm_read_byte(addr)
-#define pgm_read_word_far(addr) pgm_read_word(addr)
-#define pgm_read_dword_far(addr) pgm_read_dword(addr)
-#define pgm_read_float_far(addr) pgm_read_float(addr)
-#endif
-#endif
-
 //Magnetometer Registers
 #define MPU9250_RA_MAG_ADDRESS			0x0C
 #define MPU9250_RA_MAG_WHO_AM_I			0x00	// value: 0x48 
@@ -122,6 +77,7 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_RA_YG_OFFSET_L			0x16
 #define MPU9250_RA_ZG_OFFSET_H			0x17
 #define MPU9250_RA_ZG_OFFSET_L			0x18
+
 #define MPU9250_RA_SMPLRT_DIV			0x19
 #define MPU9250_RA_CONFIG				0x1A
 #define MPU9250_RA_GYRO_CONFIG			0x1B
@@ -129,6 +85,7 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_RA_ACCEL_CONFIG2		0x1D
 #define MPU9250_RA_LP_ACCEL_ODR			0x1E
 #define MPU9250_RA_WOM_THR				0x1F
+
 #define MPU9250_RA_FIFO_EN				0x23
 #define MPU9250_RA_I2C_MST_CTRL			0x24
 #define MPU9250_RA_I2C_SLV0_ADDR		0x25
@@ -147,12 +104,13 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_RA_I2C_SLV4_REG			0x32
 #define MPU9250_RA_I2C_SLV4_DO			0x33
 #define MPU9250_RA_I2C_SLV4_CTRL		0x34
-
 #define MPU9250_RA_I2C_SLV4_DI			0x35
 #define MPU9250_RA_I2C_MST_STATUS		0x36
+
 #define MPU9250_RA_INT_PIN_CFG			0x37
 #define MPU9250_RA_INT_ENABLE			0x38
 #define MPU9250_RA_INT_STATUS			0x3A
+
 #define MPU9250_RA_ACCEL_XOUT_H			0x3B
 #define MPU9250_RA_ACCEL_XOUT_L			0x3C
 #define MPU9250_RA_ACCEL_YOUT_H			0x3D
@@ -167,6 +125,7 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_RA_GYRO_YOUT_L			0x46
 #define MPU9250_RA_GYRO_ZOUT_H			0x47
 #define MPU9250_RA_GYRO_ZOUT_L			0x48
+
 #define MPU9250_RA_EXT_SENS_DATA_00		0x49
 #define MPU9250_RA_EXT_SENS_DATA_01		0x4A
 #define MPU9250_RA_EXT_SENS_DATA_02		0x4B
@@ -191,21 +150,26 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_RA_EXT_SENS_DATA_21		0x5E
 #define MPU9250_RA_EXT_SENS_DATA_22		0x5F
 #define MPU9250_RA_EXT_SENS_DATA_23		0x60
+
 #define MPU9250_RA_I2C_SLV0_DO          0x63
 #define MPU9250_RA_I2C_SLV1_DO          0x64
 #define MPU9250_RA_I2C_SLV2_DO			0x65
-
 #define MPU9250_RA_I2C_SLV3_DO			0x66
 #define MPU9250_RA_I2C_MST_DELAY_CTRL	0x67
+
 #define MPU9250_RA_SIGNAL_PATH_RESET	0x68
 #define MPU9250_RA_MOT_DETECT_CTRL		0x69
 #define MPU9250_RA_USER_CTRL			0x6A
+
 #define MPU9250_RA_PWR_MGMT_1			0x6B
 #define MPU9250_RA_PWR_MGMT_2			0x6C
+
 #define MPU9250_RA_FIFO_COUNTH			0x72
 #define MPU9250_RA_FIFO_COUNTL			0x73
 #define MPU9250_RA_FIFO_R_W				0x74
+
 #define MPU9250_RA_WHO_AM_I				0x75
+
 #define MPU9250_RA_XA_OFFSET_H			0x77
 #define MPU9250_RA_XA_OFFSET_L			0x78
 #define MPU9250_RA_YA_OFFSET_H			0x7A
@@ -215,35 +179,18 @@ typedef uint32_t prog_uint32_t;
 
 ///////////////////
 
-#define MPU9250_TC_PWR_MODE_BIT     7
-#define MPU9250_TC_OFFSET_BIT       6
-#define MPU9250_TC_OFFSET_LENGTH    6
-#define MPU9250_TC_OTP_BNK_VLD_BIT  0
-
-#define MPU9250_VDDIO_LEVEL_VLOGIC  0
-#define MPU9250_VDDIO_LEVEL_VDD     1
-
 #define MPU9250_CFG_EXT_SYNC_SET_BIT    5
 #define MPU9250_CFG_EXT_SYNC_SET_LENGTH 3
-#define MPU9250_CFG_DLPF_CFG_BIT    2
-#define MPU9250_CFG_DLPF_CFG_LENGTH 3
+#define MPU9250_CFG_DLPF_CFG_BIT		2
+#define MPU9250_CFG_DLPF_CFG_LENGTH		3
 
-#define MPU9250_EXT_SYNC_DISABLED       0x0
-#define MPU9250_EXT_SYNC_TEMP_OUT_L     0x1
-#define MPU9250_EXT_SYNC_GYRO_XOUT_L    0x2
-#define MPU9250_EXT_SYNC_GYRO_YOUT_L    0x3
-#define MPU9250_EXT_SYNC_GYRO_ZOUT_L    0x4
-#define MPU9250_EXT_SYNC_ACCEL_XOUT_L   0x5
-#define MPU9250_EXT_SYNC_ACCEL_YOUT_L   0x6
-#define MPU9250_EXT_SYNC_ACCEL_ZOUT_L   0x7
-
-#define MPU9250_DLPF_BW_256         0x00
-#define MPU9250_DLPF_BW_188         0x01
-#define MPU9250_DLPF_BW_98          0x02
-#define MPU9250_DLPF_BW_42          0x03
-#define MPU9250_DLPF_BW_20          0x04
-#define MPU9250_DLPF_BW_10          0x05
-#define MPU9250_DLPF_BW_5           0x06
+#define MPU9250_DLPF_BW_256				0x00
+#define MPU9250_DLPF_BW_188				0x01
+#define MPU9250_DLPF_BW_98				0x02
+#define MPU9250_DLPF_BW_42				0x03
+#define MPU9250_DLPF_BW_20				0x04
+#define MPU9250_DLPF_BW_10				0x05
+#define MPU9250_DLPF_BW_5				0x06
 
 #define MPU9250_GCONFIG_FS_SEL_BIT      4
 #define MPU9250_GCONFIG_FS_SEL_LENGTH   2
@@ -365,15 +312,6 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_INTERRUPT_DMP_INT_BIT       1
 #define MPU9250_INTERRUPT_DATA_RDY_BIT      0
 
-// TODO: figure out what these actually do
-// UMPL source code is not very obivous
-#define MPU9250_DMPINT_5_BIT            5
-#define MPU9250_DMPINT_4_BIT            4
-#define MPU9250_DMPINT_3_BIT            3
-#define MPU9250_DMPINT_2_BIT            2
-#define MPU9250_DMPINT_1_BIT            1
-#define MPU9250_DMPINT_0_BIT            0
-
 #define MPU9250_MOTION_MOT_XNEG_BIT     7
 #define MPU9250_MOTION_MOT_XPOS_BIT     6
 #define MPU9250_MOTION_MOT_YNEG_BIT     5
@@ -392,13 +330,6 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_PATHRESET_GYRO_RESET_BIT    2
 #define MPU9250_PATHRESET_ACCEL_RESET_BIT   1
 #define MPU9250_PATHRESET_TEMP_RESET_BIT    0
-
-#define MPU9250_DETECT_ACCEL_ON_DELAY_BIT       5
-#define MPU9250_DETECT_ACCEL_ON_DELAY_LENGTH    2
-#define MPU9250_DETECT_FF_COUNT_BIT             3
-#define MPU9250_DETECT_FF_COUNT_LENGTH          2
-#define MPU9250_DETECT_MOT_COUNT_BIT            1
-#define MPU9250_DETECT_MOT_COUNT_LENGTH         2
 
 #define MPU9250_DETECT_DECREMENT_RESET  0x0
 #define MPU9250_DETECT_DECREMENT_1      0x1
@@ -443,17 +374,6 @@ typedef uint32_t prog_uint32_t;
 #define MPU9250_WAKE_FREQ_5         0x2
 #define MPU9250_WAKE_FREQ_10        0x3
 
-#define MPU9250_BANKSEL_PRFTCH_EN_BIT       6
-#define MPU9250_BANKSEL_CFG_USER_BANK_BIT   5
-#define MPU9250_BANKSEL_MEM_SEL_BIT         4
-#define MPU9250_BANKSEL_MEM_SEL_LENGTH      5
-
-#define MPU9250_DMP_MEMORY_BANKS        8
-#define MPU9250_DMP_MEMORY_BANK_SIZE    256
-#define MPU9250_DMP_MEMORY_CHUNK_SIZE   16
-
-// note: DMP code memory blocks defined at end of header file
-
 class MPU9250 {
 public:
 	MPU9250();
@@ -461,10 +381,6 @@ public:
 
 	bool initialize();
 	bool testConnection();
-
-	// AUX_VDDIO register
-	uint8_t getAuxVDDIOLevel();
-	void setAuxVDDIOLevel(uint8_t level);
 
 	// SMPLRT_DIV register
 	uint8_t getRate();
@@ -487,46 +403,26 @@ public:
 	void setAccelYSelfTest(bool enabled);
 	bool getAccelZSelfTest();
 	void setAccelZSelfTest(bool enabled);
+
 	uint8_t getFullScaleAccelRange();
 	void setFullScaleAccelRange(uint8_t range);
 	uint8_t getDHPFMode();
 	void setDHPFMode(uint8_t mode);
 
-	// FF_THR register
-	uint8_t getFreefallDetectionThreshold();
-	void setFreefallDetectionThreshold(uint8_t threshold);
-
-	// FF_DUR register
-	uint8_t getFreefallDetectionDuration();
-	void setFreefallDetectionDuration(uint8_t duration);
-
-	// MOT_THR register
-	uint8_t getMotionDetectionThreshold();
-	void setMotionDetectionThreshold(uint8_t threshold);
-
-	// MOT_DUR register
-	uint8_t getMotionDetectionDuration();
-	void setMotionDetectionDuration(uint8_t duration);
-
-	// ZRMOT_THR register
-	uint8_t getZeroMotionDetectionThreshold();
-	void setZeroMotionDetectionThreshold(uint8_t threshold);
-
-	// ZRMOT_DUR register
-	uint8_t getZeroMotionDetectionDuration();
-	void setZeroMotionDetectionDuration(uint8_t duration);
-
 	// FIFO_EN register
 	bool getTempFIFOEnabled();
 	void setTempFIFOEnabled(bool enabled);
+
 	bool getXGyroFIFOEnabled();
 	void setXGyroFIFOEnabled(bool enabled);
 	bool getYGyroFIFOEnabled();
 	void setYGyroFIFOEnabled(bool enabled);
 	bool getZGyroFIFOEnabled();
 	void setZGyroFIFOEnabled(bool enabled);
+
 	bool getAccelFIFOEnabled();
 	void setAccelFIFOEnabled(bool enabled);
+
 	bool getSlave2FIFOEnabled();
 	void setSlave2FIFOEnabled(bool enabled);
 	bool getSlave1FIFOEnabled();
@@ -631,38 +527,22 @@ public:
 	bool getIntI2CMasterStatus();
 	bool getIntDataReadyStatus();
 
-	// ACCEL_*OUT_* registers
 	bool getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz);
 	bool getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
-	bool getAcceleration(int16_t* x, int16_t* y, int16_t* z);
-	int16_t getAccelerationX();
-	int16_t getAccelerationY();
-	int16_t getAccelerationZ();
 
-	bool getMag(int16_t* mx, int16_t* my, int16_t* mz);
+	// ACCEL_*OUT_* registers
+	bool getAcceleration(int16_t* x, int16_t* y, int16_t* z);
 
 	// TEMP_OUT_* registers
 	bool getTemperature(int16_t* temperature);
 
 	// GYRO_*OUT_* registers
 	bool getRotation(int16_t* x, int16_t* y, int16_t* z);
-	int16_t getRotationX();
-	int16_t getRotationY();
-	int16_t getRotationZ();
 
 	// EXT_SENS_DATA_* registers
 	uint8_t getExternalSensorByte(int position);
 	uint16_t getExternalSensorWord(int position);
 	uint32_t getExternalSensorDWord(int position);
-
-	// MOT_DETECT_STATUS register
-	bool getXNegMotionDetected();
-	bool getXPosMotionDetected();
-	bool getYNegMotionDetected();
-	bool getYPosMotionDetected();
-	bool getZNegMotionDetected();
-	bool getZPosMotionDetected();
-	bool getZeroMotionDetected();
 
 	// I2C_SLV*_DO register
 	void setSlaveOutputByte(uint8_t num, uint8_t data);
@@ -677,14 +557,6 @@ public:
 	void resetGyroscopePath();
 	void resetAccelerometerPath();
 	void resetTemperaturePath();
-
-	// MOT_DETECT_CTRL register
-	uint8_t getAccelerometerPowerOnDelay();
-	void setAccelerometerPowerOnDelay(uint8_t delay);
-	uint8_t getFreefallDetectionCounterDecrement();
-	void setFreefallDetectionCounterDecrement(uint8_t decrement);
-	uint8_t getMotionDetectionCounterDecrement();
-	void setMotionDetectionCounterDecrement(uint8_t decrement);
 
 	// USER_CTRL register
 	bool getFIFOEnabled();
@@ -733,35 +605,6 @@ public:
 
 	// WHO_AM_I register
 	uint8_t getDeviceID();
-	void setDeviceID(uint8_t id);
-
-	// ======== UNDOCUMENTED/DMP REGISTERS/METHODS ========
-
-	// XG_OFFS_TC register
-	uint8_t getOTPBankValid();
-	void setOTPBankValid(bool enabled);
-	int8_t getXGyroOffsetTC();
-	void setXGyroOffsetTC(int8_t offset);
-
-	// YG_OFFS_TC register
-	int8_t getYGyroOffsetTC();
-	void setYGyroOffsetTC(int8_t offset);
-
-	// ZG_OFFS_TC register
-	int8_t getZGyroOffsetTC();
-	void setZGyroOffsetTC(int8_t offset);
-
-	// X_FINE_GAIN register
-	int8_t getXFineGain();
-	void setXFineGain(int8_t gain);
-
-	// Y_FINE_GAIN register
-	int8_t getYFineGain();
-	void setYFineGain(int8_t gain);
-
-	// Z_FINE_GAIN register
-	int8_t getZFineGain();
-	void setZFineGain(int8_t gain);
 
 	// XA_OFFS_* registers
 	int16_t getXAccelOffset();
@@ -775,31 +618,11 @@ public:
 	int16_t getZAccelOffset();
 	void setZAccelOffset(int16_t offset);
 
-	// XG_OFFS_USR* registers
-	int16_t getXGyroOffset();
-	void setXGyroOffset(int16_t offset);
-
-	// YG_OFFS_USR* register
-	int16_t getYGyroOffset();
-	void setYGyroOffset(int16_t offset);
-
-	// ZG_OFFS_USR* register
-	int16_t getZGyroOffset();
-	void setZGyroOffset(int16_t offset);
-
 	// INT_ENABLE register (DMP functions)
 	bool getIntPLLReadyEnabled();
 	void setIntPLLReadyEnabled(bool enabled);
 	bool getIntDMPEnabled();
 	void setIntDMPEnabled(bool enabled);
-
-	// DMP_INT_STATUS
-	bool getDMPInt5Status();
-	bool getDMPInt4Status();
-	bool getDMPInt3Status();
-	bool getDMPInt2Status();
-	bool getDMPInt1Status();
-	bool getDMPInt0Status();
 
 	// INT_STATUS register (DMP functions)
 	bool getIntPLLReadyStatus();
@@ -809,233 +632,6 @@ public:
 	bool getDMPEnabled();
 	void setDMPEnabled(bool enabled);
 	void resetDMP();
-
-	// BANK_SEL register
-	void setMemoryBank(uint8_t bank, bool prefetchEnabled = false, bool userBank = false);
-
-	// MEM_START_ADDR register
-	void setMemoryStartAddress(uint8_t address);
-
-	// MEM_R_W register
-	uint8_t readMemoryByte();
-	void writeMemoryByte(uint8_t data);
-	void readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank = 0, uint8_t address = 0);
-	bool writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank = 0, uint8_t address = 0, bool verify = true, bool useProgMem = false);
-	bool writeProgMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank = 0, uint8_t address = 0, bool verify = true);
-
-	bool writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, bool useProgMem = false);
-	bool writeProgDMPConfigurationSet(const uint8_t *data, uint16_t dataSize);
-
-	// DMP_CFG_1 register
-	uint8_t getDMPConfig1();
-	void setDMPConfig1(uint8_t config);
-
-	// DMP_CFG_2 register
-	uint8_t getDMPConfig2();
-	void setDMPConfig2(uint8_t config);
-
-	// special methods for MotionApps 2.0 implementation
-#ifdef MPU9250_INCLUDE_DMP_MOTIONAPPS20
-	uint8_t *dmpPacketBuffer;
-	uint16_t dmpPacketSize;
-
-	uint8_t dmpInitialize();
-	bool dmpPacketAvailable();
-
-	uint8_t dmpSetFIFORate(uint8_t fifoRate);
-	uint8_t dmpGetFIFORate();
-	uint8_t dmpGetSampleStepSizeMS();
-	uint8_t dmpGetSampleFrequency();
-	int32_t dmpDecodeTemperature(int8_t tempReg);
-
-	// Register callbacks after a packet of FIFO data is processed
-	//uint8_t dmpRegisterFIFORateProcess(inv_obj_func func, int16_t priority);
-	//uint8_t dmpUnregisterFIFORateProcess(inv_obj_func func);
-	uint8_t dmpRunFIFORateProcesses();
-
-	// Setup FIFO for various output
-	uint8_t dmpSendQuaternion(uint_fast16_t accuracy);
-	uint8_t dmpSendGyro(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendAccel(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendLinearAccel(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendLinearAccelInWorld(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendControlData(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendSensorData(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendExternalSensorData(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendGravity(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendPacketNumber(uint_fast16_t accuracy);
-	uint8_t dmpSendQuantizedAccel(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendEIS(uint_fast16_t elements, uint_fast16_t accuracy);
-
-	// Get Fixed Point data from FIFO
-	uint8_t dmpGetAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternion(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternion(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternion(Quaternion *q, const uint8_t* packet = 0);
-	uint8_t dmpGet6AxisQuaternion(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGet6AxisQuaternion(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGet6AxisQuaternion(Quaternion *q, const uint8_t* packet = 0);
-	uint8_t dmpGetRelativeQuaternion(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetRelativeQuaternion(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetRelativeQuaternion(Quaternion *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyro(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyro(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyro(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpSetLinearAccelFilterCoefficient(float coef);
-	uint8_t dmpGetLinearAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccel(VectorInt16 *v, VectorInt16 *vRaw, VectorFloat *gravity);
-	uint8_t dmpGetLinearAccelInWorld(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccelInWorld(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccelInWorld(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccelInWorld(VectorInt16 *v, VectorInt16 *vReal, Quaternion *q);
-	uint8_t dmpGetGyroAndAccelSensor(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroAndAccelSensor(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroAndAccelSensor(VectorInt16 *g, VectorInt16 *a, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroSensor(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroSensor(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroSensor(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetControlData(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetTemperature(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(VectorFloat *v, Quaternion *q);
-	uint8_t dmpGetUnquantizedAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetUnquantizedAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetUnquantizedAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetQuantizedAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuantizedAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuantizedAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetExternalSensorData(int32_t *data, uint16_t size, const uint8_t* packet = 0);
-	uint8_t dmpGetEIS(int32_t *data, const uint8_t* packet = 0);
-
-	uint8_t dmpGetEuler(float *data, Quaternion *q);
-	uint8_t dmpGetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity);
-
-	// Get Floating Point data from FIFO
-	uint8_t dmpGetAccelFloat(float *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternionFloat(float *data, const uint8_t* packet = 0);
-
-	uint8_t dmpProcessFIFOPacket(const unsigned char *dmpData);
-	uint8_t dmpReadAndProcessFIFOPacket(uint8_t numPackets, uint8_t *processed = NULL);
-
-	uint8_t dmpSetFIFOProcessedCallback(void(*func) (void));
-
-	uint8_t dmpInitFIFOParam();
-	uint8_t dmpCloseFIFO();
-	uint8_t dmpSetGyroDataSource(uint8_t source);
-	uint8_t dmpDecodeQuantizedAccel();
-	uint32_t dmpGetGyroSumOfSquare();
-	uint32_t dmpGetAccelSumOfSquare();
-	void dmpOverrideQuaternion(long *q);
-	uint16_t dmpGetFIFOPacketSize();
-#endif
-
-	// special methods for MotionApps 4.1 implementation
-#ifdef MPU9250_INCLUDE_DMP_MOTIONAPPS41
-	uint8_t *dmpPacketBuffer;
-	uint16_t dmpPacketSize;
-
-	uint8_t dmpInitialize();
-	bool dmpPacketAvailable();
-
-	uint8_t dmpSetFIFORate(uint8_t fifoRate);
-	uint8_t dmpGetFIFORate();
-	uint8_t dmpGetSampleStepSizeMS();
-	uint8_t dmpGetSampleFrequency();
-	int32_t dmpDecodeTemperature(int8_t tempReg);
-
-	// Register callbacks after a packet of FIFO data is processed
-	//uint8_t dmpRegisterFIFORateProcess(inv_obj_func func, int16_t priority);
-	//uint8_t dmpUnregisterFIFORateProcess(inv_obj_func func);
-	uint8_t dmpRunFIFORateProcesses();
-
-	// Setup FIFO for various output
-	uint8_t dmpSendQuaternion(uint_fast16_t accuracy);
-	uint8_t dmpSendGyro(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendAccel(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendLinearAccel(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendLinearAccelInWorld(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendControlData(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendSensorData(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendExternalSensorData(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendGravity(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendPacketNumber(uint_fast16_t accuracy);
-	uint8_t dmpSendQuantizedAccel(uint_fast16_t elements, uint_fast16_t accuracy);
-	uint8_t dmpSendEIS(uint_fast16_t elements, uint_fast16_t accuracy);
-
-	// Get Fixed Point data from FIFO
-	uint8_t dmpGetAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternion(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternion(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternion(Quaternion *q, const uint8_t* packet = 0);
-	uint8_t dmpGet6AxisQuaternion(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGet6AxisQuaternion(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGet6AxisQuaternion(Quaternion *q, const uint8_t* packet = 0);
-	uint8_t dmpGetRelativeQuaternion(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetRelativeQuaternion(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetRelativeQuaternion(Quaternion *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyro(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyro(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyro(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetMag(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpSetLinearAccelFilterCoefficient(float coef);
-	uint8_t dmpGetLinearAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccel(VectorInt16 *v, VectorInt16 *vRaw, VectorFloat *gravity);
-	uint8_t dmpGetLinearAccelInWorld(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccelInWorld(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccelInWorld(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetLinearAccelInWorld(VectorInt16 *v, VectorInt16 *vReal, Quaternion *q);
-	uint8_t dmpGetGyroAndAccelSensor(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroAndAccelSensor(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroAndAccelSensor(VectorInt16 *g, VectorInt16 *a, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroSensor(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroSensor(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGyroSensor(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetControlData(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetTemperature(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetGravity(VectorFloat *v, Quaternion *q);
-	uint8_t dmpGetUnquantizedAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetUnquantizedAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetUnquantizedAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetQuantizedAccel(int32_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuantizedAccel(int16_t *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuantizedAccel(VectorInt16 *v, const uint8_t* packet = 0);
-	uint8_t dmpGetExternalSensorData(int32_t *data, uint16_t size, const uint8_t* packet = 0);
-	uint8_t dmpGetEIS(int32_t *data, const uint8_t* packet = 0);
-
-	uint8_t dmpGetEuler(float *data, Quaternion *q);
-	uint8_t dmpGetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity);
-
-	// Get Floating Point data from FIFO
-	uint8_t dmpGetAccelFloat(float *data, const uint8_t* packet = 0);
-	uint8_t dmpGetQuaternionFloat(float *data, const uint8_t* packet = 0);
-
-	uint8_t dmpProcessFIFOPacket(const unsigned char *dmpData);
-	uint8_t dmpReadAndProcessFIFOPacket(uint8_t numPackets, uint8_t *processed = NULL);
-
-	uint8_t dmpSetFIFOProcessedCallback(void(*func) (void));
-
-	uint8_t dmpInitFIFOParam();
-	uint8_t dmpCloseFIFO();
-	uint8_t dmpSetGyroDataSource(uint8_t source);
-	uint8_t dmpDecodeQuantizedAccel();
-	uint32_t dmpGetGyroSumOfSquare();
-	uint32_t dmpGetAccelSumOfSquare();
-	void dmpOverrideQuaternion(long *q);
-	uint16_t dmpGetFIFOPacketSize();
-#endif
 
 	// Magnet
 	uint8_t magGetDeviceID();
@@ -1056,6 +652,7 @@ public:
 
 	bool magSelfTest(uint64_t timeoutMillis);
 
+	bool getMag(int16_t* mx, int16_t* my, int16_t* mz);
 	bool magGetAxisSensitivity(float* sx, float *sy, float *sz);
 
 private:
