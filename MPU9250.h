@@ -59,7 +59,7 @@ THE SOFTWARE.
 #define MPU9250_MAG_MODE_FUSE			0b1111
 
 #define MPU9250_MAG_SENS_14BIT			0	// 0.6  microT/LSB
-#define MPU9250_MAG_SENS_16BIT			1	// 0.16 microT/LSB
+#define MPU9250_MAG_SENS_16BIT			1	// 0.15 microT/LSB
 
 #define MPU9250_MAG_SENS_MAP(asa)	    ((((asa - 128) * 0.5f) / 128.0f) + 1)
 
