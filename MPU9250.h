@@ -71,6 +71,10 @@ THE SOFTWARE.
 #define MPU9250_RA_SELF_TEST_Y_GYRO		0x01
 #define MPU9250_RA_SELF_TEST_Z_GYRO		0x02
 
+#define MPU9250_RA_SELF_TEST_X_ACCEL	0x0D
+#define MPU9250_RA_SELF_TEST_Y_ACCEL	0x0E
+#define MPU9250_RA_SELF_TEST_Z_ACCEL	0x0F
+
 #define MPU9250_RA_XG_OFFSET_H			0x13
 #define MPU9250_RA_XG_OFFSET_L			0x14
 #define MPU9250_RA_YG_OFFSET_H			0x15
@@ -529,6 +533,8 @@ public:
 
 	bool getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz);
 	bool getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
+	bool getMotion6(int16_t* values);
+	bool getAverageMotion6(int16_t* values);
 
 	// ACCEL_*OUT_* registers
 	bool getAcceleration(int16_t* x, int16_t* y, int16_t* z);
@@ -632,6 +638,9 @@ public:
 	bool getDMPEnabled();
 	void setDMPEnabled(bool enabled);
 	void resetDMP();
+	
+	// Test the mechanical and electrical portions of the gyroscope and the accelerometer
+	bool selfTest(float* result);
 
 	// Magnet
 	uint8_t magGetDeviceID();

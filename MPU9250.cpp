@@ -1472,8 +1472,6 @@ bool MPU9250::getIntDataReadyStatus() {
 	return buffer[0];
 }
 
-// ACCEL_*OUT_* registers
-
 /** Get raw 9-axis motion sensor readings (accel/gyro/compass).
 * @param ax 16-bit signed integer container for accelerometer X-axis value
 * @param ay 16-bit signed integer container for accelerometer Y-axis value
@@ -1530,6 +1528,32 @@ bool MPU9250::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int
 	*gz = (((int16_t)buffer[12]) << 8) | buffer[13];
 	return true;
 }
+
+bool MPU9250::getMotion6(int16_t* values) {
+	return getMotion6(values, values + 1, values + 2, values + 3, values + 4, values + 5);
+}
+
+bool MPU9250::getAverageMotion6(int16_t* values) {	
+	float sum[6];
+
+	int count = 0;
+	for (int i = 0; i < 50; i++) {
+		int16_t temp[6];
+		if (getMotion6(temp)) {
+			for (int i = 0; i < 6; i++)
+				sum[i] += temp[i];
+			count++;
+		}
+		delay(10);
+	}
+	
+	for (int i = 0; i < 6; i++)
+		values[i] = (int16_t)(sum[i] / count);
+	return true;
+}
+
+
+// ACCEL_*OUT_* registers
 /** Get 3-axis accelerometer readings.
 * These registers store the most recent accelerometer measurements.
 * Accelerometer measurements are written to these registers at the Sample Rate
@@ -2337,6 +2361,66 @@ void MPU9250::setDMPEnabled(bool enabled) {
 }
 void MPU9250::resetDMP() {
 	I2Cdev::writeBit(devAddr, MPU9250_RA_USER_CTRL, MPU9250_USERCTRL_DMP_RESET_BIT, true);
+}
+
+bool MPU9250::selfTest(float* result) {
+	// Result of -1000 indicates failure with communication
+	for (int i = 0; i < 6; i++)
+		result[i] = -1000;
+
+	bool ok = true;
+	// Save settings
+	I2Cdev::readByte(devAddr, MPU9250_RA_ACCEL_CONFIG, buffer);
+	uint8_t accelConfig = buffer[0];
+	I2Cdev::readByte(devAddr, MPU9250_RA_GYRO_CONFIG, buffer);
+	uint8_t gyroConfig = buffer[0];
+
+	// When performing accelerometer self test, the full-scale range should be set to ±8g.
+	// When performing self test for the gyroscope, the full-scale range should be set to ±250dps.
+	setFullScaleAccelRange(MPU9250_ACCEL_FS_2);
+	setFullScaleGyroRange(MPU9250_GYRO_FS_250);
+
+	delay(30);
+
+	int16_t before[6];
+	if (getAverageMotion6(before)) {
+		// Enable self test and set settings (2g, 250dps)
+		I2Cdev::writeByte(devAddr, MPU9250_RA_ACCEL_CONFIG, 0xE0);
+		I2Cdev::writeByte(devAddr, MPU9250_RA_GYRO_CONFIG, 0xE0);
+		delay(30);
+
+		int16_t after[6];
+		if (getAverageMotion6(after)) {
+			// Read factory trim
+			float factoryTrim[6];
+			I2Cdev::readBytes(devAddr, MPU9250_RA_SELF_TEST_X_ACCEL, 3, buffer);
+			factoryTrim[0] = (float)2620 * (pow(1.01f, ((float)buffer[0] - 1.0f))); // FT[Xa] factory trim calculation
+			factoryTrim[1] = (float)2620 * (pow(1.01f, ((float)buffer[1] - 1.0f))); // FT[Ya] factory trim calculation
+			factoryTrim[2] = (float)2620 * (pow(1.01f, ((float)buffer[2] - 1.0f))); // FT[Za] factory trim calculation
+			I2Cdev::readBytes(devAddr, MPU9250_RA_SELF_TEST_X_GYRO, 3, buffer);
+			factoryTrim[3] = (float)2620 * (pow(1.01f, ((float)buffer[0] - 1.0f))); // FT[Xg] factory trim calculation
+			factoryTrim[4] = (float)2620 * (pow(1.01f, ((float)buffer[1] - 1.0f))); // FT[Yg] factory trim calculation
+			factoryTrim[5] = (float)2620 * (pow(1.01f, ((float)buffer[2] - 1.0f))); // FT[Zg] factory trim calculation
+
+			for (int i = 0; i < 6; i++)
+				result[i] = 100.0 * ((float)(after[i] - before[i]) - factoryTrim[i]) / factoryTrim[i];
+
+			// Check results for passed
+			for (int i = 0; i < 6; i++)
+				if (abs(result[i]) > 14) // -14% - 14% => not passed
+					ok = false;
+		}
+		else
+			ok = false;
+	}
+	else
+		ok = false;
+
+	// Reset settings
+	I2Cdev::writeByte(devAddr, MPU9250_RA_ACCEL_CONFIG, accelConfig);
+	I2Cdev::writeByte(devAddr, MPU9250_RA_GYRO_CONFIG, gyroConfig);
+	
+	return ok;
 }
 
 uint8_t MPU9250::magGetDeviceID() {
